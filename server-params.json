@@ -1,6 +1,6 @@
 [
     {
         "ParameterKey": "EnvironmentName",
-        "ParameterValue": "UdacityDevOpsProj2"
+        "ParameterValue": "BlueGreenDeployment"
     }
 ]
