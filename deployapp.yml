@@ -1,6 +1,6 @@
 Description: >
-    Lito Molina, Udacity Cloud DevOps Program - Project 2
-    This deploys the web application servers.
+    Lito Molina
+    This deploys the web site container (nginx).
 
 Parameters:
 
