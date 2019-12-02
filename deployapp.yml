@@ -8,6 +8,11 @@ Parameters:
         Description: An environment name that will be prefixed to resource names
         Type: String
 
+    KeyName:
+        Description: The EC2 key pair to allow SSH  access instance
+        Type: AWS::EC2::KeyPair::KeyName
+
+
 Resources:
 
 # Security Groups
@@ -67,22 +72,11 @@ Resources:
                     Action:
                     -  sts:AssumeRole
             Path: "/"
-    RolePolicies:
-        Type: AWS::IAM::Policy
-        Properties:
-            PolicyName: AmazonS3ReadOnlyAccess
-            PolicyDocument:
-                Version: '2012-10-17'
-                Statement:
-                - 
-                    Effect: Allow
-                    Action: 
-                    -   s3:Get*
-                    -   s3:List*
-                    Resource: 
-                    -   arn:aws:s3:::myudacity-website/*
-            Roles:
-            -   Ref: RootRole
+            ManagedPolicyArns:
+              - arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy
+              - arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy
+              - arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly
+
     RootInstanceProfile:
         Type: AWS::IAM::InstanceProfile
         Properties:
@@ -98,13 +92,22 @@ Resources:
                 Fn::Base64: !Sub |
                     #!/bin/bash
                     apt-get update -y
-                    apt-get install unzip awscli -y
-                    apt-get install apache2 -y
-                    systemctl start apache2
-                    systemctl enable apache2
-                    cd /var/www/html
-                    aws s3 cp s3://myudacity-website/index.html .
-            ImageId: ami-06f2f779464715dc5
+                    apt-get install awscli -y
+                    snap install kubectl --classic
+                    cd /
+                    sudo curl -Lo minikube https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64 && sudo chmod +x minikube && sudo mv minikube /usr/local/bin/
+                    apt install docker.io -y
+                    aws ecr get-login --region us-west-2 --no-include-email > aws_ecr_login.sh
+                    cd /
+                    chmod +x aws_ecr_login.sh
+                    sudo ./aws_ecr_login.sh
+                    sudo docker pull 133823844190.dkr.ecr.us-west-2.amazonaws.com/udacity-hub:mywebapp
+                    # The next command is commented out since its only to test that the container can be run thru docker
+                    # sudo docker run --name webapp -p 80:80 133823844190.dkr.ecr.us-west-2.amazonaws.com/udacity-hub:mywebapp
+                    # sudo minikube start --vm-driver=none
+                    # sudo kubectl run webapp --image=133823844190.dkr.ecr.us-west-2.amazonaws.com/udacity-hub:mywebapp --port=80
+            ImageId: ami-06d51e91cea0dac8d
+            KeyName: !Ref KeyName
             IamInstanceProfile: !Ref RootInstanceProfile
             SecurityGroups:
             -   Ref: WebServerSecGroup
@@ -119,7 +122,7 @@ Resources:
         Properties:
             VPCZoneIdentifier:
             -   Fn::ImportValue:
-                    !Sub "${EnvironmentName}-PRIV-NETS"
+                    !Sub "${EnvironmentName}-PUB-NETS"
             LaunchConfigurationName:
                 Ref: WebAppLaunchConfig
             MinSize: '4'
