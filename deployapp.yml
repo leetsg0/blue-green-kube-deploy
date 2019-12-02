@@ -104,8 +104,9 @@ Resources:
                     sudo docker pull 133823844190.dkr.ecr.us-west-2.amazonaws.com/udacity-hub:mywebapp
                     # The next command is commented out since its only to test that the container can be run thru docker
                     # sudo docker run --name webapp -p 80:80 133823844190.dkr.ecr.us-west-2.amazonaws.com/udacity-hub:mywebapp
-                    # sudo minikube start --vm-driver=none
-                    # sudo kubectl run webapp --image=133823844190.dkr.ecr.us-west-2.amazonaws.com/udacity-hub:mywebapp --port=80
+                    git clone https://github.com/leetsg0/blue-green-kube-deploy.git
+                    sudo minikube start --vm-driver=none
+                    sudo kubectl run webapp --image=133823844190.dkr.ecr.us-west-2.amazonaws.com/udacity-hub:mywebapp --port=80
             ImageId: ami-06d51e91cea0dac8d
             KeyName: !Ref KeyName
             IamInstanceProfile: !Ref RootInstanceProfile
