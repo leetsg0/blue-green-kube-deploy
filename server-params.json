@@ -2,5 +2,9 @@
     {
         "ParameterKey": "EnvironmentName",
         "ParameterValue": "BlueGreenDeployment"
+    },
+    {
+	"ParameterKey": "KeyName",
+	"ParameterValue": "leets-udacityC3"
     }
 ]
